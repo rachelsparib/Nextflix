@@ -1,4 +1,5 @@
 package enums;
+
 /**
  * An enumerate type for program commands.
  * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI
