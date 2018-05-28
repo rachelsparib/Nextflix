@@ -1,4 +1,4 @@
-package netflix;
+package netflix.account;
 
 public interface Profile {
 	

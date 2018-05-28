@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
+import netflix.account.Account;
+import netflix.content.Content;
+
 /**
  * A streaming service with user account management and audiovisual contents (movies and tv shows).
  * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI

@@ -1,4 +1,4 @@
-package netflix;
+package netflix.content;
 
 import java.util.Comparator;
 /**
