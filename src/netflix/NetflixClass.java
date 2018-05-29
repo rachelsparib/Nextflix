@@ -150,10 +150,16 @@ public class NetflixClass implements Netflix {
 	}
 
 	@Override
-	public LogoutResult logout() {
+	public LogoutResult logout() throws NoClientLoggedInException {
+		if(!isClientLogged())
+			throw new NoClientLoggedInException();
 		
-		// TODO Auto-generated method stub
-		return null;
+		LogoutResult res = new LogoutResult(activeAcc, activeDeviceId);
+		
+		activeAcc = null;
+		activeDeviceId = null;
+		
+		return res;
 	}
 
 	@Override

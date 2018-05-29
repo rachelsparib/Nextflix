@@ -87,7 +87,7 @@ public interface Netflix {
 		
 	LogoutResult disconnect() throws NoClientLoggedInException;	// terminates session. Has to know active account. Removes the device used.
 	
-	LogoutResult logout();		// terminates session. Does not remove device used.
+	LogoutResult logout() throws NoClientLoggedInException;		// terminates session. Does not remove device used.
 	
 	void setMembershipPlan(String plan);	// use active session. isClientLogged?
 	

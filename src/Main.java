@@ -61,7 +61,7 @@ public class Main {
 				disconnect(n);
 				break;
 			case LOGOUT:
-				//
+				logout(n);
 				break;
 			case MEMBERSHIP:
 				//
@@ -241,6 +241,19 @@ public class Main {
 		} catch (NoClientLoggedInException e) {
 			System.out.println(MessageEnum.NO_CLIENT_IS_LOGIN);
 		}
+	}
+
+	
+
+	private static void logout(Netflix n) {
+		try {
+			LogoutResult res = n.logout();
+			System.out.format("Goodbye %s (%s still connected).\n", res.getAccount().getName(), res.getDeviceId());
+			
+		} catch (NoClientLoggedInException e) {
+			System.out.println(MessageEnum.NO_CLIENT_IS_LOGIN);
+		}
+		
 	}
 
 	/**
