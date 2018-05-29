@@ -20,6 +20,8 @@ public interface Account {
 	
 	public String getName();
 	
+	public void removeDevice(String deviceID);
+	
 	/**
 	 * Returns information of an account.
 	 * @return information of an account.

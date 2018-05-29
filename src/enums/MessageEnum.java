@@ -16,6 +16,7 @@ public enum MessageEnum {
 	ACCOUNT_DOES_NOT_EXIST				("Account does not exist."),
 	WRONG_PASS							("Wrong password."),
 	NOT_POSSIBLE_CONNECT_MORE_DEVICES	("Not possible to connect more devices"),
+	NO_CLIENT_IS_LOGIN					("No client is logged in."),
 	
 	EXIT_SUCCESS		("Exiting...");
 	

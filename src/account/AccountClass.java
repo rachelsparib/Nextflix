@@ -85,4 +85,10 @@ public class AccountClass implements Account {
 		return name;
 	}
 
+	@Override
+	public void removeDevice(String deviceID) {
+		devices.remove(deviceID);
+		
+	}
+
 }

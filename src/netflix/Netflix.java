@@ -9,6 +9,7 @@ import netflix.exceptions.AccountDoesNotExistsException;
 import netflix.exceptions.ClientAlreadyLoggedInException;
 import netflix.exceptions.ExceededMaxNumberDevicesException;
 import netflix.exceptions.ExistentAccountException;
+import netflix.exceptions.NoClientLoggedInException;
 import netflix.exceptions.WrongPasswordException;
 
 
@@ -84,9 +85,9 @@ public interface Netflix {
 	 */
 	Account login(String client, String passoword, String deviceID) throws ClientAlreadyLoggedInException, AccountDoesNotExistsException, WrongPasswordException, ExceededMaxNumberDevicesException;	// may add new device if is the first time used. Sets active account (temporary object)
 		
-	void disconnect();	// terminates session. Has to know active account. Removes the device used.
+	LogoutResult disconnect() throws NoClientLoggedInException;	// terminates session. Has to know active account. Removes the device used.
 	
-	void logout();		// terminates session. Does not remove device used.
+	LogoutResult logout();		// terminates session. Does not remove device used.
 	
 	void setMembershipPlan(String plan);	// use active session. isClientLogged?
 	

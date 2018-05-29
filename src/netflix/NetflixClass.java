@@ -21,6 +21,7 @@ import netflix.exceptions.AccountDoesNotExistsException;
 import netflix.exceptions.ClientAlreadyLoggedInException;
 import netflix.exceptions.ExceededMaxNumberDevicesException;
 import netflix.exceptions.ExistentAccountException;
+import netflix.exceptions.NoClientLoggedInException;
 import netflix.exceptions.OccupiedServiceException;
 import netflix.exceptions.WrongPasswordException;
 /**
@@ -58,6 +59,8 @@ public class NetflixClass implements Netflix {
 	 * Active account in the streaming service.
 	 */
 	Account activeAcc;
+	
+	String activeDeviceId;
 	
 	/**
 	 * Creates a streaming service.
@@ -131,20 +134,26 @@ public class NetflixClass implements Netflix {
 		}
 		
 		activeAcc = acc;
+		activeDeviceId = deviceID;
 		
 		return activeAcc;
 	}
 
 	@Override
-	public void disconnect() {
-		// TODO Auto-generated method stub
+	public LogoutResult disconnect() throws NoClientLoggedInException {
+		if(!isClientLogged())
+			throw new NoClientLoggedInException();
+		
+		activeAcc.removeDevice(activeDeviceId);
 
+		return logout();
 	}
 
 	@Override
-	public void logout() {
+	public LogoutResult logout() {
+		
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	@Override
