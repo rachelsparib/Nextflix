@@ -1,19 +1,17 @@
-package netflix.content;
+package content;
 
 import java.util.Comparator;
 /**
- * Class that implements 
+ * Implementation of a comparator of Content by its title.
  * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI
  *
- * @param <Content>
  */
 public class ComparatorByTitle implements Comparator<Content> {
 
 	@Override
 	public int compare(Content cont1, Content cont2) {
-		// sort by title
-		
-		return 0;
+		// compare by title
+		return cont1.getTitle().compareTo(cont2.getTitle());
 	}
 	
 }

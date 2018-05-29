@@ -2,11 +2,15 @@ package netflix;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.SortedSet;
 
-import netflix.account.Account;
-import netflix.content.Content;
+import account.Account;
+import content.Content;
+import netflix.exceptions.AccountDoesNotExistsException;
+import netflix.exceptions.ClientAlreadyLoggedInException;
+import netflix.exceptions.ExceededMaxNumberDevicesException;
+import netflix.exceptions.ExistentAccountException;
+import netflix.exceptions.WrongPasswordException;
+
 
 /**
  * A streaming service with user account management and audiovisual contents (movies and tv shows).
@@ -17,42 +21,72 @@ public interface Netflix {
 	
 	// also add to other collections after creating the object!
 	/**
-	 * 
-	 * @param title
-	 * @param director
-	 * @param duration
-	 * @param ageRate
-	 * @param year
-	 * @param genre
-	 * @param cast
+	 * Adds a movie to the collection of content.
+	 * @param title title of the movie.
+	 * @param director director of the movie.
+	 * @param duration movie's duration.
+	 * @param ageRate movie's age rate.
+	 * @param year movie's year of production.
+	 * @param genre movie's genre.
+	 * @param cast movie's cast members.
 	 */
 	void uploadMovie(String title, String director, int duration, String ageRate, int year, String genre, List<String> cast);
-	// use lastUploaded
+	// sortedMap has to define (always) the comparator used. It is the structure chosen to allow to obtain certain elements
+	// in the future and list them according to a certain order.
 	
+	/**
+	 * Adds a tv show to the collection of content.
+	 * @param title tv show's title.
+	 * @param creator tv show's creator.
+	 * @param seasons number of seasons of the show.
+	 * @param epsPerSeason number of episodes per season.
+	 * @param ageRate age rate of the show.
+	 * @param year year of production of the show.
+	 * @param genre genre of the show.
+	 * @param cast cast members of the show.
+	 */
 	void uploadTvShow(String title, String creator, int seasons, int epsPerSeason, String ageRate, int year, String genre, List<String> cast);
-	// use lastUploaded
-	// sortedMap has to define (always) the comparator used. It is the structure chosen to allow to obtain certain elements in the future
-	// and list them according to a certain order.
-	// title -> Content
+	
 	/**
 	 * Returns an iterator for the map of last added content, sorted by title.
-	 * @param lastContent content to be added to the map of last contents uploaded.
 	 * @return an iterator for the map of last added content, sorted by title.
 	 */
-	Iterator<Content> lastUploaded(Content lastContent); // add argument to SortedMap<String, Content>
-	//toString of content will have all the information plus the first 3 cast members
+	Iterator<Content> lastUploaded();
+	//toString of content will have all the information except for the cast members
 	
+	/**
+	 * Returns the collection of cast members of the content <code>cont</code>.
+	 * @param cont content whose cast members will be retrieved.
+	 * @return list of cast members of the content <code>cont</code>.
+	 */
+	List<String> castMembers(Content cont);
 	
+	/**
+	 * Adds a client to the account database.
+	 * @param client client's name.
+	 * @param email client's email.
+	 * @param password account's password.
+	 * @param deviceID client's device ID of access.
+	 * @throws OccupiedServiceException if an account is logged in the service,
+	 * 		ExistentAccountException if the account to be added is equal to an existing account.
+	 */
 	void register(String client, String email, String password, String deviceID);
 	
-	void login(String client, String passoword, String deviceID);	// may add new device if is the first time used. Sets active account (temporary object)
-	
-	// private boolean isClientLogged(); in NetflixClass.  Account active != null ?
-	
+	/**
+	 * 
+	 * @param client
+	 * @param passoword
+	 * @param deviceID
+	 * @throws ClientAlreadyLoggedInException 
+	 * @throws AccountDoesNotExistsException 
+	 * @throws WrongPasswordException 
+	 * @throws ExceededMaxNumberDevicesException 
+	 */
+	Account login(String client, String passoword, String deviceID) throws ClientAlreadyLoggedInException, AccountDoesNotExistsException, WrongPasswordException, ExceededMaxNumberDevicesException;	// may add new device if is the first time used. Sets active account (temporary object)
+		
 	void disconnect();	// terminates session. Has to know active account. Removes the device used.
 	
 	void logout();		// terminates session. Does not remove device used.
-	
 	
 	void setMembershipPlan(String plan);	// use active session. isClientLogged?
 	
@@ -68,8 +102,5 @@ public interface Netflix {
 	
 	Iterator<Account> infoAccount();		// uses active account. gets toString of Account and connected devices and profiles, both by order of insertion
 							// define iterators to use in this method
-							// partir este metodo em varios iteradores
-	
-	//private //metodo para inserir nas estruturas: permite depois alterar facilmente a estrutura utilizada para armazenamento					
-	
+							// partir este metodo em varios iteradores	
 }

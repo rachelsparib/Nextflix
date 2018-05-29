@@ -1,4 +1,4 @@
-package netflix;
+package content;
 
 import java.util.Comparator;
 /**
@@ -12,7 +12,7 @@ public class ComparatorByYear implements Comparator<Content> {
 	public int compare(Content cont1, Content cont2) {
 		int year1 = cont1.getYear();
 		int year2 = cont2.getYear();
-		if(year1 < year2)
+		if(year1 < year2)	// first the oldest
 			return -1;
 		else if(year1 > year2)
 			return 1;

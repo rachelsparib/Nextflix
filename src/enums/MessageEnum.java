@@ -9,8 +9,14 @@ public enum MessageEnum {
 	/**
 	 * Enumerate constants and its values.
 	 */
-	UPLOAD_SUCCESS		("Database was updated:"),
-	INVALID_COMMAND		("Unknown command."),
+	UPLOAD_SUCCESS						("Database was updated:"),
+	INVALID_COMMAND						("Unknown command."),
+	CLIENT_ALREADY_LOGGEDIN				("Client already logged in."),
+	ANOTHER_CLIENT_LOGGEDIN				("Another client is logged in."),
+	ACCOUNT_DOES_NOT_EXIST				("Account does not exist."),
+	WRONG_PASS							("Wrong password."),
+	NOT_POSSIBLE_CONNECT_MORE_DEVICES	("Not possible to connect more devices"),
+	
 	EXIT_SUCCESS		("Exiting...");
 	
 	/**
