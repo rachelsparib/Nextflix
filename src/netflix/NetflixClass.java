@@ -17,11 +17,14 @@ import content.Movie;
 import content.MovieClass;
 import content.TvShow;
 import content.TvShowClass;
+import enums.MembershipPlanEnum;
 import netflix.exceptions.AccountDoesNotExistsException;
 import netflix.exceptions.ClientAlreadyLoggedInException;
+import netflix.exceptions.DowngradeMembershipException;
 import netflix.exceptions.ExceededMaxNumberDevicesException;
 import netflix.exceptions.ExistentAccountException;
 import netflix.exceptions.NoClientLoggedInException;
+import netflix.exceptions.NoMembershipChangedException;
 import netflix.exceptions.OccupiedServiceException;
 import netflix.exceptions.WrongPasswordException;
 /**
@@ -163,9 +166,45 @@ public class NetflixClass implements Netflix {
 	}
 
 	@Override
-	public void setMembershipPlan(String plan) {
+	public void setMembershipPlan(String plan) throws NoClientLoggedInException, NoMembershipChangedException, DowngradeMembershipException {
+		if(!isClientLogged())
+			throw new NoClientLoggedInException();
+		
+		if(getMembershipPlan().equalsIgnoreCase(plan))
+			throw new NoMembershipChangedException();
+		
+		MembershipPlanEnum planEnum = MembershipPlanEnum.BASIC;
+		if(plan.equalsIgnoreCase("Standard"))
+			planEnum = MembershipPlanEnum.STANDARD;
+		else if(plan.equalsIgnoreCase("Premium"))
+			planEnum = MembershipPlanEnum.PREMIUM;
+		
+		int newMaxDeviceCount;
+		switch (planEnum) {
+		default:
+		case BASIC:
+			newMaxDeviceCount = 1;
+			break;
+			
+		case STANDARD:
+			newMaxDeviceCount = 2;
+			break;
+			
+		case PREMIUM:
+			newMaxDeviceCount = 4;
+			break;
+		}
+		
+		if(activeAcc.getDeviceCount() > newMaxDeviceCount)
+			throw new DowngradeMembershipException();
+		
+		activeAcc.setMembershipPlan(planEnum);
+	}
+	
+	@Override
+	public String getMembershipPlan() {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	@Override

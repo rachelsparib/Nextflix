@@ -17,6 +17,8 @@ public enum MessageEnum {
 	WRONG_PASS							("Wrong password."),
 	NOT_POSSIBLE_CONNECT_MORE_DEVICES	("Not possible to connect more devices"),
 	NO_CLIENT_IS_LOGIN					("No client is logged in."),
+	NO_MEMBERSHIP_CHANGE				("No membership plan change."),
+	CANNOT_DOWNGRADE_MEMBERSHIP			("Cannot downgrade membership plan at the moment."),
 	
 	EXIT_SUCCESS		("Exiting...");
 	

@@ -1,4 +1,7 @@
 package account;
+
+import enums.MembershipPlanEnum;
+
 /**
  * A user account in the streaming service.
  * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI
@@ -21,6 +24,8 @@ public interface Account {
 	public String getName();
 	
 	public void removeDevice(String deviceID);
+	
+	public void setMembershipPlan(MembershipPlanEnum plan);
 	
 	/**
 	 * Returns information of an account.

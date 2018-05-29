@@ -13,9 +13,11 @@ import netflix.Netflix;
 import netflix.NetflixClass;
 import netflix.exceptions.AccountDoesNotExistsException;
 import netflix.exceptions.ClientAlreadyLoggedInException;
+import netflix.exceptions.DowngradeMembershipException;
 import netflix.exceptions.ExceededMaxNumberDevicesException;
 import netflix.exceptions.ExistentAccountException;
 import netflix.exceptions.NoClientLoggedInException;
+import netflix.exceptions.NoMembershipChangedException;
 import netflix.exceptions.OccupiedServiceException;
 import netflix.exceptions.WrongPasswordException;
 
@@ -64,7 +66,7 @@ public class Main {
 				logout(n);
 				break;
 			case MEMBERSHIP:
-				//
+				membership(in, n);
 				break;
 			case PROFILE:
 				//
@@ -100,6 +102,7 @@ public class Main {
 		System.out.print(MessageEnum.EXIT_SUCCESS);
 
 	}
+
 
 	/**
 	 * Auxiliary method for uploading content to the streaming service.
@@ -254,6 +257,24 @@ public class Main {
 			System.out.println(MessageEnum.NO_CLIENT_IS_LOGIN);
 		}
 		
+	}
+	
+	private static void membership(Scanner in, Netflix n) {
+		String membership = in.nextLine();
+		
+		try {
+			String currentPlane = n.getMembershipPlan();
+			
+			n.setMembershipPlan(membership);
+			System.out.format("Membership plan was changed from %s to %s.\n", currentPlane, membership);
+			
+		} catch (NoClientLoggedInException e) {
+			System.out.println(MessageEnum.NO_CLIENT_IS_LOGIN);
+		} catch (NoMembershipChangedException e) {
+			System.out.println(MessageEnum.NO_MEMBERSHIP_CHANGE);
+		} catch (DowngradeMembershipException e) {
+			System.out.println(MessageEnum.CANNOT_DOWNGRADE_MEMBERSHIP);
+		}		
 	}
 
 	/**

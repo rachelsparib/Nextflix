@@ -7,9 +7,11 @@ import account.Account;
 import content.Content;
 import netflix.exceptions.AccountDoesNotExistsException;
 import netflix.exceptions.ClientAlreadyLoggedInException;
+import netflix.exceptions.DowngradeMembershipException;
 import netflix.exceptions.ExceededMaxNumberDevicesException;
 import netflix.exceptions.ExistentAccountException;
 import netflix.exceptions.NoClientLoggedInException;
+import netflix.exceptions.NoMembershipChangedException;
 import netflix.exceptions.WrongPasswordException;
 
 
@@ -89,7 +91,9 @@ public interface Netflix {
 	
 	LogoutResult logout() throws NoClientLoggedInException;		// terminates session. Does not remove device used.
 	
-	void setMembershipPlan(String plan);	// use active session. isClientLogged?
+	void setMembershipPlan(String plan) throws NoClientLoggedInException, NoMembershipChangedException, DowngradeMembershipException;	// use active session. isClientLogged?
+	
+	String getMembershipPlan(); // return actual membership Plan
 	
 	void profile(String profileName);
 	

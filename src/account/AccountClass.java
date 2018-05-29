@@ -91,4 +91,10 @@ public class AccountClass implements Account {
 		
 	}
 
+	@Override
+	public void setMembershipPlan(MembershipPlanEnum plan) {
+		this.plan = plan;
+		
+	}
+
 }
