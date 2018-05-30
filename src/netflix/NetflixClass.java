@@ -1,75 +1,63 @@
 package netflix;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import account.Account;
 import account.AccountClass;
+import account.Profile;
 import content.ComparatorByTitle;
+import content.ComparatorByYear;
 import content.Content;
-import content.Movie;
 import content.MovieClass;
-import content.TvShow;
 import content.TvShowClass;
 import enums.MembershipPlanEnum;
-import netflix.exceptions.AccountDoesNotExistsException;
-import netflix.exceptions.ClientAlreadyLoggedInException;
-import netflix.exceptions.DowngradeMembershipException;
-import netflix.exceptions.ExceededMaxNumberDevicesException;
-import netflix.exceptions.ExistentAccountException;
-import netflix.exceptions.NoClientLoggedInException;
-import netflix.exceptions.NoMembershipChangedException;
-import netflix.exceptions.OccupiedServiceException;
-import netflix.exceptions.WrongPasswordException;
+import netflix.exceptions.*;
 /**
  * An implementation of the streaming service.
- * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI
+ * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
  *
  */
 public class NetflixClass implements Netflix {
 	
 	/**
-	 * Collection of contents, sorted by title. 
+	 * Map of contents, mapped by title. 
 	 */
-	SortedMap<String, Content> contents;	// String is naturally ordered
+	private Map<String, Content> contents;	// String is naturally ordered
 	
 	/**
 	 * Collection of last added contents, sorted by title.
 	 */
-	SortedSet<Content> lastAdded;
+	private SortedSet<Content> lastAdded;
 	/**
-	 * Collection of content mapped by genre.
+	 * Map of a sorted set of contents mapped by genre.
 	 */
-	Map<String, SortedSet<Content>> contentByGenre;
+	private Map<String, SortedSet<Content>> contentByGenre;
 	
 	/**
-	 * Collection of content mapped by cast name.
+	 * Map of a sorted set of contents mapped by cast name.
 	 */
-	Map<String, SortedSet<Content>> contentByCast;
+	private Map<String, SortedSet<Content>> contentByCast;
 	
 	/**
-	 * Collection of accounts mapped by email.
+	 * Map of accounts mapped by email.
 	 */
-	Map<String, Account> accounts;
+	private Map<String, Account> accounts;
 	
 	/**
 	 * Active account in the streaming service.
 	 */
-	Account activeAcc;
-	
-	String activeDeviceId;
+	private Account activeAcc;
 	
 	/**
 	 * Creates a streaming service.
 	 */
 	public NetflixClass() {
-		contents = new TreeMap<String, Content>(); // title -> content
+		contents = new HashMap<String, Content>(); // title -> content
 		lastAdded = new TreeSet<>(new ComparatorByTitle());
 		contentByGenre = new HashMap<>();	// genre -> SortedSet<Content> (comparatorByTitle)
 		contentByCast = new HashMap<>();	// castName -> SortedSet<Content> (comparatorByYear)
@@ -78,27 +66,27 @@ public class NetflixClass implements Netflix {
 	}
 	
 	@Override
-	public void uploadMovie(String title, String director, int duration, String ageRate, int year, String genre,
+	public void uploadMovie(String title, String director, int duration, int ageRate, int year, String genre,
 			List<String> cast) {
 		Content m = new MovieClass(title, director, duration, ageRate, year, genre, cast);
 		loadInStorage(m);
 	}
 
 	@Override
-	public void uploadTvShow(String title, String creator, int seasons, int epsPerSeason, String ageRate, int year,
+	public void uploadTvShow(String title, String creator, int seasons, int epsPerSeason, int ageRate, int year,
 			String genre, List<String> cast) {
 		Content m = new TvShowClass(title, creator, seasons, epsPerSeason, ageRate, year, genre, cast);
 		loadInStorage(m);
 	}
 
 	@Override
-	public Iterator<Content> lastUploaded() {
+	public Iterator<Content> listLastUploaded() {
 		return lastAdded.iterator();
 	}
 
 	@Override
-	public List<String> castMembers(Content cont) {
-		return cont.getCast();
+	public Iterator<String> listCastMembers(Content cont) {
+		return cont.listCast();
 	}
 
 	@Override
@@ -110,119 +98,91 @@ public class NetflixClass implements Netflix {
 		if(accounts.containsKey(email))
 			throw new ExistentAccountException();
 		accounts.put(email, acc);
+		
+		try {
+			login(email, password, deviceID);		// in this case exceptions won't be thrown but are caught anyway.
+		} catch (ClientAlreadyLoggedInException e) {
+		} catch(OccupiedServiceException e) {
+		} catch (WrongPasswordException e) {
+		} catch (ExceededMaxNumberDevicesException e) {
+		}
+		
 	}
 
 	@Override
-	public Account login(String email, String password, String deviceID) throws ClientAlreadyLoggedInException, AccountDoesNotExistsException, WrongPasswordException, ExceededMaxNumberDevicesException {
-		
+	public String login(String email, String password, String deviceID) throws 
+	ClientAlreadyLoggedInException, OccupiedServiceException, AccountDoesNotExistException, WrongPasswordException, ExceededMaxNumberDevicesException {
 		if(activeAcc != null && activeAcc.getEmail().equalsIgnoreCase(email))
 			throw new ClientAlreadyLoggedInException();
 		
 		if(this.isClientLogged())
 			throw new OccupiedServiceException();
-
+		
 		if(!accounts.containsKey(email))
-			throw new AccountDoesNotExistsException();
+			throw new AccountDoesNotExistException();
 		
 		Account acc = accounts.get(email);
-		if(!acc.getPass().equals(password))
+		if(!acc.getPassword().equals(password))
 			throw new WrongPasswordException();
+		try {
+			acc.addDevice(deviceID);		// propagates ExceededMaxNumberDevicesException
+		} catch(DeviceAlreadyExistsException e) {
+			// device already exists, doesn't get added
+		} 
 		
-		if(!acc.hasDevice(deviceID)){
-			//first time using device
-			if(acc.getDeviceCount() + 1 > acc.getMaxDevices())
-				throw new ExceededMaxNumberDevicesException();
-			
-			acc.addDevice(deviceID);
-		}
-		
+//		activeAcc = new AccountClass(acc.getName(), acc.getEmail(), acc.getPassword(), deviceID);
+//		if(!acc.getPlan().getName().equalsIgnoreCase("basic"))
+//			activeAcc.setPlan(acc.getPlan());
+//		
+//		return activeAcc.getName();
+
 		activeAcc = acc;
-		activeDeviceId = deviceID;
-		
-		return activeAcc;
-	}
-
-	@Override
-	public LogoutResult disconnect() throws NoClientLoggedInException {
-		if(!isClientLogged())
-			throw new NoClientLoggedInException();
-		
-		activeAcc.removeDevice(activeDeviceId);
-
-		return logout();
-	}
-
-	@Override
-	public LogoutResult logout() throws NoClientLoggedInException {
-		if(!isClientLogged())
-			throw new NoClientLoggedInException();
-		
-		LogoutResult res = new LogoutResult(activeAcc, activeDeviceId);
-		
-		activeAcc = null;
-		activeDeviceId = null;
-		
-		return res;
-	}
-
-	@Override
-	public void setMembershipPlan(String plan) throws NoClientLoggedInException, NoMembershipChangedException, DowngradeMembershipException {
-		if(!isClientLogged())
-			throw new NoClientLoggedInException();
-		
-		if(getMembershipPlan().equalsIgnoreCase(plan))
-			throw new NoMembershipChangedException();
-		
-		MembershipPlanEnum planEnum = MembershipPlanEnum.BASIC;
-		if(plan.equalsIgnoreCase("Standard"))
-			planEnum = MembershipPlanEnum.STANDARD;
-		else if(plan.equalsIgnoreCase("Premium"))
-			planEnum = MembershipPlanEnum.PREMIUM;
-		
-		int newMaxDeviceCount;
-		switch (planEnum) {
-		default:
-		case BASIC:
-			newMaxDeviceCount = 1;
-			break;
-			
-		case STANDARD:
-			newMaxDeviceCount = 2;
-			break;
-			
-		case PREMIUM:
-			newMaxDeviceCount = 4;
-			break;
-		}
-		
-		if(activeAcc.getDeviceCount() > newMaxDeviceCount)
-			throw new DowngradeMembershipException();
-		
-		activeAcc.setMembershipPlan(planEnum);
+		return acc.getName();
 	}
 	
 	@Override
-	public String getMembershipPlan() {
-		// TODO Auto-generated method stub
-		return null;
+	public Account getActiveAccount() throws NoClientLoggedInException {
+		if(!isClientLogged())
+			throw new NoClientLoggedInException();
+		
+		return activeAcc;
+	}
+	
+	@Override
+	public void disconnect() throws NoClientLoggedInException{
+		Account activeAcc = getActiveAccount();				// can throw a NoClientLoggedInException
+		activeAcc.removeDevice(activeAcc.listDevices().next());
+		logout();
 	}
 
 	@Override
-	public void profile(String profileName) {
-		// TODO Auto-generated method stub
-
+	public void logout() {
+		activeAcc = null;
 	}
 
 	@Override
-	public void profileKids(String profileName, String ageRate) {
-		// TODO Auto-generated method stub
-
+	public void setMembershipPlan(String plan) throws NoClientLoggedInException, MembershipUnchangedException, DowngradeMembershipException {
+		MembershipPlanEnum p = MembershipPlanEnum.getValue(plan);
+		Account activeAcc = getActiveAccount();				// can throw a NoClientLoggedInException
+		activeAcc.setPlan(p);		// can throw MembershipUnchangedException or DowngradeMembershipException
 	}
 
 	@Override
-	public void select(String profileName) {
-		// TODO Auto-generated method stub
+	public void profile(String profileName) throws NoClientLoggedInException, ProfileAlreadyExistException, ProfileNumberExccededException {
+		Account activeAcc = getActiveAccount();				// can throw a NoClientLoggedInException
+		activeAcc.addProfile(profileName);		// can throw an exception
+	}
 
+	@Override
+	public void profileKids(String profileName, int ageRate) throws NoClientLoggedInException, ProfileAlreadyExistException, ProfileNumberExccededException {
+		Account activeAcc = getActiveAccount();				// can throw a NoClientLoggedInException
+		activeAcc.addChildrenProfile(profileName, ageRate);		// can throw an exception
+	}
+
+	@Override
+	public void select(String profileName) throws NoClientLoggedInException, ProfileDoesNotExistException {
+		Account activeAcc = getActiveAccount();		// can throw a NoClientLoggedInException
+		activeAcc.setActiveProfile(profileName);
 	}
 
 	@Override
@@ -240,6 +200,7 @@ public class NetflixClass implements Netflix {
 	@Override
 	public Iterator<Account> infoAccount() {
 		// TODO Auto-generated method stub
+		// uses active account
 		return null;
 	}
 	
@@ -251,38 +212,59 @@ public class NetflixClass implements Netflix {
 		//SortedSet<Content> lastAdded;
 		lastAdded.add(cont);
 		
-		// SortedMap<String, Content> contents
+		// Map<String, Content> contents
 		contents.put(cont.getTitle(), cont);
 		
-		SortedSet<Content> contentWithGenre;
-		String genre = cont.getGenre();
-		if(!contentByGenre.containsKey(genre))
-			contentWithGenre = new TreeSet<>(new ComparatorByTitle()); 	// ordered by title	
-		else
-			contentWithGenre = contentByGenre.get(genre);	// returns set of contents associated to the genre
-		// Map<String, SortedSet<Content>> contentByGenre;
-		contentByGenre.put(cont.getGenre(), contentWithGenre);
-		
-		String headOfContent;
-		if(cont instanceof Movie)
-			headOfContent = ((Movie) cont).getDirector();
-		else
-			headOfContent = ((TvShow) cont).getCreator();
-		
-		List<String> team = cont.getCast();	// tenho de fazer new para uma nova copia?
-		//team.add(headOfContent);	TODO ESTAVA A INSERIR NO CAST EXISTENTE
-		
-		// add castNames to cast name collection <String, SortedSet <Content>> 
-		// foreach cast name
-		//for(List<String> team : values())
-			
-		// SearchByName junta criador ou diretor ao cast
-		// ContentByName: adicionar diretor, criador e membros do cast
-		
-		// instanceOf(movie), add creator
+		storeInContentByGenre(cont);
+		storeInContentByCast(cont);
 	}
 	
+	/**
+	 * Private method to add a content to the collection of content by genre.
+	 * @param cont content to be added to the collection.
+	 */
+	private void storeInContentByGenre(Content cont) {
+		SortedSet<Content> contentWithGenre;
+		String genre = cont.getGenre();
+		if(!contentByGenre.containsKey(genre)) {
+			contentWithGenre = new TreeSet<>(new ComparatorByTitle()); 	// ordered by title	
+			contentByGenre.put(genre, contentWithGenre);
+		}else
+			contentWithGenre = contentByGenre.get(genre);	// returns set of contents associated to the genre					
+		// Map<String, SortedSet<Content>> contentByGenre;
+		contentWithGenre.add(cont); // remove mapping to this key
+	}
+	
+	/**
+	 * Private method to add a content to the collection of content by cast.
+	 * @param cont content to be added to the collection.
+	 */
+	private void storeInContentByCast(Content cont) {
+		List<String> completeCast = new LinkedList<String>();	// copy of cast plus the director/creator
+		Iterator<String> it = cont.listCast();
+		while(it.hasNext())
+			completeCast.add(it.next());
+		completeCast.add(cont.getHeadOfContent());		// adds creator/director
+		
+		SortedSet <Content> contentWithCast;	// collection of contents with a member of a cast
+		for(String castName : completeCast) {	// for(each) cast name
+			if(!contentByCast.containsKey(castName)) {
+				contentWithCast = new TreeSet<Content>(new ComparatorByYear());
+				contentByCast.put(castName, contentWithCast);
+			}else
+				contentWithCast = contentByCast.get(castName);
+			contentWithCast.add(cont);
+			// Map<String, SortedSet<Content>> contentByCast;
+		}	
+	}
+	
+	/**
+	 * Private method to verify if there's an account logged in the service.
+	 * @return <code>true</code> if there's an account logged in the service or <code>false</code> otherwise.
+	 */
 	private boolean isClientLogged() {
 		return activeAcc != null;
 	}
+
+	
 }

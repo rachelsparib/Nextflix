@@ -1,10 +1,10 @@
 package content;
 
-import java.util.List;
+import java.util.Iterator;
 
 /**
  * An available content in the streaming service.
- * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI
+ * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
  *
  */
 public interface Content {
@@ -16,16 +16,22 @@ public interface Content {
 	String getTitle(); // implemented in AbstractContent
 	
 	/**
+	 * Returns the head of content's name (its creator or director).
+	 * @return head of content's name.
+	 */
+	String getHeadOfContent();
+	
+	/**
 	 * Returns content's age rate.
 	 * @return content's age rate.
 	 */
-	String getAgeRate();
+	int getAgeRate();
 	
 	/**
 	 * Returns content's year of production.
 	 * @return year of production of the content.
 	 */
-	int getYear();	// implemented in AbstractContent
+	int getYear();
 	
 	/**
 	 * Returns content's genre.
@@ -34,10 +40,10 @@ public interface Content {
 	String getGenre();
 	
 	/**
-	 * Returns collection of cast members names.
-	 * @return collection of cast members names.
+	 * Returns an iterator for the collection of cast members names.
+	 * @return an iterator for the collection of cast members names.
 	 */
-	List<String> getCast();
+	Iterator<String> listCast();
 	
 	/**
 	 * Returns information of a content.

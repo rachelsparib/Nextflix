@@ -5,9 +5,5 @@ package content;
  *
  */
 public interface Movie extends Content {
-	/**
-	 * Returns movie's director name.
-	 * @return name of the director of the movie.
-	 */
-	String getDirector();
+	
 }

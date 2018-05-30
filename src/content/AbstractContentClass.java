@@ -1,10 +1,10 @@
 package content;
 
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 /**
  * A content in the streaming service.
- * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI
+ * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
  *
  */
 public abstract class AbstractContentClass implements Content {
@@ -14,9 +14,14 @@ public abstract class AbstractContentClass implements Content {
 	private String title;
 	
 	/**
+	 * The content's head name.
+	 */
+	private String head;
+	
+	/**
 	 * The content's age rate.
 	 */
-	private String ageRate;
+	private int ageRate;
 	
 	/**
 	 * The contents year of production.
@@ -31,18 +36,20 @@ public abstract class AbstractContentClass implements Content {
 	/**
 	 * The names of the content's cast members.
 	 */
-	List<String> cast;
+	private List<String> cast;
 	
 	/**
 	 * Creates a content in the streaming service.
 	 * @param title content's title.
+	 * @param head content's head name.
 	 * @param ageRate content's age rate.
 	 * @param year content's year of production.
 	 * @param genre content's genre.
 	 * @param cast names of the content's cast members.
 	 */
-	protected AbstractContentClass(String title, String ageRate, int year, String genre, List<String> cast) {
+	protected AbstractContentClass(String title, String head, int ageRate, int year, String genre, List<String> cast) {
 		this.title = title;
+		this.head = head;
 		this.ageRate = ageRate;
 		this.year = year;
 		this.genre = genre;
@@ -54,7 +61,11 @@ public abstract class AbstractContentClass implements Content {
 		return title;
 	}
 	
-	public String getAgeRate() {
+	public String getHeadOfContent() {
+		return head;
+	}
+	
+	public int getAgeRate() {
 		return ageRate;
 	}
 	
@@ -67,8 +78,8 @@ public abstract class AbstractContentClass implements Content {
 		return genre;
 	}
 	
-	public List<String> getCast(){
-		return cast;
+	public Iterator<String> listCast(){
+		return cast.iterator();
 	}
 	
 	public abstract String toString();

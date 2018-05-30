@@ -3,15 +3,10 @@ package content;
 import java.util.List;
 /**
  * An implementation of a movie in the streaming service.
- * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI
+ * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
  *
  */
 public class MovieClass extends AbstractContentClass implements Movie {
-	/**
-	 * The movie's director name.
-	 */
-	private String director;
-	
 	/**
 	 * The movie's duration.
 	 */
@@ -27,23 +22,16 @@ public class MovieClass extends AbstractContentClass implements Movie {
 	 * @param genre movie's genre.
 	 * @param cast names of the movie's cast members.
 	 */
-	public MovieClass(String title, String director, int duration, String ageRate, int year, String genre, List<String> cast) {
-		super(title, ageRate, year, genre, cast);
-		this.director = director;
+	public MovieClass(String title, String director, int duration, int ageRate, int year, String genre, List<String> cast) {
+		super(title, director, ageRate, year, genre, cast);
 		this.duration = duration;
 	}
 
 	@Override
 	public String toString() {
-		return super.getTitle() + "; " + director + "; " + duration + "; " + super.getAgeRate() + "; "
+		return super.getTitle() + "; " + super.getHeadOfContent() + "; " + duration + "; " + super.getAgeRate() + "+" + "; "
 		+ super.getYear() + "; " + super.getGenre();
 	}
 	// toString movie: title + director + duration + ageRate + year + genre 
-
-	@Override
-	public String getDirector() {
-		return director;
-	}
-
 	
 }

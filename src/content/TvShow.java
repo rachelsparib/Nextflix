@@ -6,9 +6,5 @@ package content;
  *
  */
 public interface TvShow extends Content {
-	/**
-	 * Returns name of the creator of the tv show.
-	 * @return tv show creator's name.
-	 */
-	String getCreator();
+	
 }
