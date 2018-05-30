@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import enums.MembershipPlanEnum;
 import netflix.exceptions.DeviceAlreadyExistsException;
+import netflix.exceptions.DeviceNotRegistedException;
 import netflix.exceptions.DowngradeMembershipException;
 import netflix.exceptions.ExceededMaxNumberDevicesException;
 import netflix.exceptions.MembershipUnchangedException;
@@ -89,11 +90,15 @@ public interface Account {
 	 */
 	void addChildrenProfile(String name, int ageRate) throws ProfileAlreadyExistException, ProfileNumberExccededException;
 	
+	public void setActiveProfile(String profileName) throws ProfileDoesNotExistException;
+	
 	/**
 	 * Returns information of an account.
 	 * @return information of an account.
 	 */
 	String toString();
-	
-	public void setActiveProfile(String profileName) throws ProfileDoesNotExistException;
+
+	public void setActiveDevice(String deviceID) throws DeviceNotRegistedException;
+
+	public String getActiveDevice();
 }

@@ -7,6 +7,7 @@ import java.util.List;
 
 import enums.MembershipPlanEnum;
 import netflix.exceptions.DeviceAlreadyExistsException;
+import netflix.exceptions.DeviceNotRegistedException;
 import netflix.exceptions.DowngradeMembershipException;
 import netflix.exceptions.ExceededMaxNumberDevicesException;
 import netflix.exceptions.MembershipUnchangedException;
@@ -41,6 +42,8 @@ public class AccountClass implements Account {
 	 */
 	List<String> devices;
 	
+	String activeDevice;
+	
 	/**
 	 * Collection of personalized profiles.
 	 */
@@ -67,6 +70,7 @@ public class AccountClass implements Account {
 		this.plan = MembershipPlanEnum.BASIC;
 		this.devices = new LinkedList<String>();
 		this.addDevice(deviceID);
+		this.activeDevice = deviceID;
 		this.profiles = new ArrayList<Profile>(MembershipPlanEnum.BASIC.getMaxProfiles());
 	}
 	
@@ -84,9 +88,12 @@ public class AccountClass implements Account {
 	public void addDevice(String deviceID) throws DeviceAlreadyExistsException, ExceededMaxNumberDevicesException {
 		if(devices.contains(deviceID))
 			throw new DeviceAlreadyExistsException();
-		if(devices.size() == getPlan().getMaxDevices())
-			throw new ExceededMaxNumberDevicesException();		
+		
+		if(devices.size() >= getPlan().getMaxDevices())
+			throw new ExceededMaxNumberDevicesException();
+		
 		devices.add(deviceID);
+		activeDevice = deviceID;
 	}
 
 	@Override
@@ -158,6 +165,19 @@ public class AccountClass implements Account {
 		}
 		
 		throw new ProfileDoesNotExistException();
+	}
+
+	@Override
+	public void setActiveDevice(String deviceID) throws DeviceNotRegistedException {
+		if (!devices.contains(deviceID))
+			throw new DeviceNotRegistedException();
+		
+		this.activeDevice = deviceID;
+	}
+
+	@Override
+	public String getActiveDevice() {
+		return activeDevice;
 	}
 	
 }

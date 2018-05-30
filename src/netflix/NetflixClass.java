@@ -129,14 +129,15 @@ public class NetflixClass implements Netflix {
 		} catch(DeviceAlreadyExistsException e) {
 			// device already exists, doesn't get added
 		} 
-		
-//		activeAcc = new AccountClass(acc.getName(), acc.getEmail(), acc.getPassword(), deviceID);
-//		if(!acc.getPlan().getName().equalsIgnoreCase("basic"))
-//			activeAcc.setPlan(acc.getPlan());
-//		
-//		return activeAcc.getName();
 
 		activeAcc = acc;
+		try {
+			activeAcc.setActiveDevice(deviceID);
+		} catch (DeviceNotRegistedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return acc.getName();
 	}
 	

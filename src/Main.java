@@ -40,7 +40,9 @@ public class Main {
 	 * @return command obtained from input.
 	 */
 	private static CommandEnum getOption(Scanner in) {
-		return CommandEnum.valueOf(in.nextLine().toUpperCase());
+		String nextLine = in.nextLine().toUpperCase();
+		
+		return CommandEnum.valueOf(nextLine);
 	}
 
 	/**
@@ -249,7 +251,7 @@ public class Main {
 			Account c = n.getActiveAccount(); // may launch
 												// NoClientLoggedException
 			String name = c.getName();
-			String deviceID = c.listDevices().next();
+			String deviceID = c.getActiveDevice();
 			n.disconnect();
 			System.out.println(MessageEnum.LOGOUT_SUCCESS + name + " (" + deviceID + MessageEnum.DEV_DISCONNECTED);
 		} catch (NoClientLoggedInException e) {
@@ -267,8 +269,9 @@ public class Main {
 		try {
 			Account c = n.getActiveAccount(); // may launch
 												// NoClientLoggedException
+			
 			String name = c.getName();
-			String deviceID = c.listDevices().next();
+			String deviceID = c.getActiveDevice();
 			n.logout();
 			System.out.println(MessageEnum.LOGOUT_SUCCESS + name + " (" + deviceID + MessageEnum.DEV_STILL_CONNECTED);
 		} catch (NoClientLoggedInException e) {
