@@ -1,5 +1,6 @@
 package netflix;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -345,12 +346,13 @@ public class NetflixClass implements Netflix {
 	}
 
 	@Override
-	public Iterator<Content> searchByGenre(String genre) throws NoClientLoggedInException, NoProfileSelectedException, NoShowFoundException {
+	public Iterator<Content> searchByGenre(String genre)
+			throws NoClientLoggedInException, NoProfileSelectedException, NoShowFoundException {
 		Account activeAcc = getActiveAccount(); // can throw a
 												// NoClientLoggedInException
 		if (!activeAcc.isProfileActive())
 			throw new NoProfileSelectedException();
-		
+
 		if (!contentByGenre.containsKey(genre))
 			throw new NoShowFoundException();
 
@@ -358,7 +360,8 @@ public class NetflixClass implements Netflix {
 	}
 
 	@Override
-	public Iterator<Content> searchByName(String name) throws NoClientLoggedInException, NoProfileSelectedException, NoShowFoundException {
+	public Iterator<Content> searchByName(String name)
+			throws NoClientLoggedInException, NoProfileSelectedException, NoShowFoundException {
 		Account activeAcc = getActiveAccount(); // can throw a
 												// NoClientLoggedInException
 		if (!activeAcc.isProfileActive())
@@ -366,18 +369,19 @@ public class NetflixClass implements Netflix {
 
 		if (!contentByCast.containsKey(name))
 			throw new NoShowFoundException();
-		
+
 		return contentByCast.get(name).iterator();
 	}
 
 	@Override
 	public Iterator<RatedContent> searchByRate(int rate) throws NoClientLoggedInException, NoProfileSelectedException {
-		Account activeAcc = getActiveAccount(); // can throw a NoClientLoggedInException
+		Account activeAcc = getActiveAccount(); // can throw a
+												// NoClientLoggedInException
 		if (!activeAcc.isProfileActive())
 			throw new NoProfileSelectedException();
-		
+
 		Profile profile = activeAcc.getActiveProfile();
-		
+
 		Map<Content, List<Integer>> contentRateAvg = new HashMap<Content, List<Integer>>();
 
 		int minAge = 200;
@@ -394,66 +398,71 @@ public class NetflixClass implements Netflix {
 				Iterator<RatedContent> it2 = p.listRated();
 				while (it2.hasNext()) {
 					RatedContent rc = it2.next();
+					Content c = rc.getContent();
 
-					if (rc.getRating() >= rate) {
-						Content c = rc.getContent();
-
-						if (c.getAgeRate() <= minAge) {
-							List<Integer> ratings;
-							if (!contentRateAvg.containsKey(c)) {
-								ratings = new ArrayList<>();
-								contentRateAvg.put(c, ratings);
-							} else {
-								ratings = contentRateAvg.get(c);
-							}
-
-							ratings.add(rc.getRating());
+					if (c.getAgeRate() <= minAge) {
+						List<Integer> ratings;
+						if (!contentRateAvg.containsKey(c)) {
+							ratings = new ArrayList<>();
+							contentRateAvg.put(c, ratings);
+						} else {
+							ratings = contentRateAvg.get(c);
 						}
+
+						ratings.add(rc.getRating());
 					}
 				}
 			}
 		}
-		
+
 		// calculate average by content.
 		TreeMap<String, List<RatedContent>> contentSortedByRate = new TreeMap<>();
-		
+
 		for (Content c : contentRateAvg.keySet()) {
 			List<Integer> rates = contentRateAvg.get(c);
-			
-			float sum = 0.0f;
-			for (Integer rateValue : rates) {
-				sum += rateValue;
-			}
-			
-			sum /= rates.size();
 
-			RatedContent rc = new RatedContent(c);
-			rc.setAverage(sum);
-			
-			String rateStr = Float.toString(sum).substring(0, 3);
-			
-			List<RatedContent> sortedRates;
-			if (!contentSortedByRate.containsKey(rateStr)) {
-				sortedRates = new ArrayList<>();
-				contentSortedByRate.put(rateStr, sortedRates);
-			} else
-				sortedRates = contentSortedByRate.get(rateStr);
-			
-			sortedRates.add(rc);
+			float avg = 0.0f;
+			for (Integer rateValue : rates) {
+				avg += rateValue;
+			}
+
+			avg /= rates.size();
+			avg = round(avg, 1);
+
+			if (avg >= rate) {
+				RatedContent rc = new RatedContent(c);
+				rc.setAverage(avg);
+
+				String rateStr = Float.toString(avg).substring(0, 3);
+
+				List<RatedContent> sortedRates;
+				if (!contentSortedByRate.containsKey(rateStr)) {
+					sortedRates = new ArrayList<>();
+					contentSortedByRate.put(rateStr, sortedRates);
+				} else
+					sortedRates = contentSortedByRate.get(rateStr);
+
+				sortedRates.add(rc);
+			}
 		}
-		
+
 		List<RatedContent> result = new ArrayList<>();
-		
+
 		ComparatorByTitleInRatedContent compByTitle = new ComparatorByTitleInRatedContent();
 		for (String rateStr : contentSortedByRate.keySet()) {
 			List<RatedContent> rates = contentSortedByRate.get(rateStr);
 			rates.sort(compByTitle);
-			
+
 			result.addAll(rates);
 		}
 		result.sort(new ComparatorByAverageRate());
-		
+
 		return result.iterator();
 	}
 
+	private static float round(float number, int decimalPlace) {
+		BigDecimal bd = new BigDecimal(number);
+		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+		return bd.floatValue();
+	}
 }
