@@ -72,4 +72,11 @@ public enum MembershipPlanEnum {
 				return p;
 		return null;
 	}
+	
+	/**
+	 * Returns information of the membership plan.
+	 */
+	public String toString() {
+		return name;
+	}
 }

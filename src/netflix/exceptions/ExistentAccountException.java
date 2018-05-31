@@ -1,7 +1,7 @@
 package netflix.exceptions;
 /**
  * An exception raised by an equal account in the system.
- * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI
+ * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
  *
  */
 @SuppressWarnings("serial")

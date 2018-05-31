@@ -1,8 +1,7 @@
 package netflix.exceptions;
-
 /**
- * An exception raised by an account already logged.
- * @author Antonio Santos 49055 MIEI & Raquel Pena 45081 MIEI
+ * An exception caused by an account already logged.
+ * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
  *
  */
 @SuppressWarnings("serial")

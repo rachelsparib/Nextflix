@@ -1,6 +1,6 @@
 package netflix.exceptions;
 /**
- * An exception raised by a failed login attempt caused by a wrong password.
+ * An exception caused by a failed login attempt caused by a wrong password.
  * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
  *
  */

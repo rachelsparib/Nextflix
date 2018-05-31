@@ -4,12 +4,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import account.Account;
 import account.AccountClass;
-import account.Profile;
 import content.ComparatorByTitle;
 import content.ComparatorByYear;
 import content.Content;
@@ -54,15 +55,21 @@ public class NetflixClass implements Netflix {
 	private Account activeAcc;
 	
 	/**
+	 * A sorted map with content's ratings mapped by content title.
+	 */
+	private SortedMap<String, Integer> ratings;	
+	
+	/**
 	 * Creates a streaming service.
 	 */
 	public NetflixClass() {
-		contents = new HashMap<String, Content>(); // title -> content
-		lastAdded = new TreeSet<>(new ComparatorByTitle());
+		contents = new HashMap<String, Content>(); // title -> Content
+		lastAdded = new TreeSet<>(new ComparatorByTitle());	// SortedSet<Content>
 		contentByGenre = new HashMap<>();	// genre -> SortedSet<Content> (comparatorByTitle)
 		contentByCast = new HashMap<>();	// castName -> SortedSet<Content> (comparatorByYear)
-		accounts = new HashMap<>();
+		accounts = new HashMap<>();			// email -> Account
 		activeAcc = null;
+		ratings = new TreeMap<>();	// title -> int wrapped by Integer 	(String naturally ordered)
 	}
 	
 	@Override
@@ -90,7 +97,8 @@ public class NetflixClass implements Netflix {
 	}
 
 	@Override
-	public void register(String client, String email, String password, String deviceID) throws OccupiedServiceException, ExistentAccountException {
+	public void register(String client, String email, String password, String deviceID) 
+			throws OccupiedServiceException, ExistentAccountException {
 		Account acc = new AccountClass(client, email, password, deviceID);
 		// Map<String, Account> accounts; email -> Account
 		if(this.isClientLogged())
@@ -110,17 +118,14 @@ public class NetflixClass implements Netflix {
 	}
 
 	@Override
-	public String login(String email, String password, String deviceID) throws 
-	ClientAlreadyLoggedInException, OccupiedServiceException, AccountDoesNotExistException, WrongPasswordException, ExceededMaxNumberDevicesException {
+	public String login(String email, String password, String deviceID) throws ClientAlreadyLoggedInException, 
+	OccupiedServiceException, AccountDoesNotExistException, WrongPasswordException, ExceededMaxNumberDevicesException {
 		if(activeAcc != null && activeAcc.getEmail().equalsIgnoreCase(email))
 			throw new ClientAlreadyLoggedInException();
-		
 		if(this.isClientLogged())
 			throw new OccupiedServiceException();
-		
 		if(!accounts.containsKey(email))
 			throw new AccountDoesNotExistException();
-		
 		Account acc = accounts.get(email);
 		if(!acc.getPassword().equals(password))
 			throw new WrongPasswordException();
@@ -129,35 +134,28 @@ public class NetflixClass implements Netflix {
 		} catch(DeviceAlreadyExistsException e) {
 			// device already exists, doesn't get added
 		} 
-
-		activeAcc = acc;
-		try {
-			activeAcc.setActiveDevice(deviceID);
-		} catch (DeviceNotRegistedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return acc.getName();
+		activeAcc = acc;			// references the account being used
+		activeAcc.setActiveDevice(deviceID);
+		return activeAcc.getName();
 	}
 	
 	@Override
 	public Account getActiveAccount() throws NoClientLoggedInException {
 		if(!isClientLogged())
 			throw new NoClientLoggedInException();
-		
 		return activeAcc;
 	}
 	
 	@Override
 	public void disconnect() throws NoClientLoggedInException{
 		Account activeAcc = getActiveAccount();				// can throw a NoClientLoggedInException
-		activeAcc.removeDevice(activeAcc.listDevices().next());
+		activeAcc.removeDevice(activeAcc.getActiveDevice());	// get active device
 		logout();
 	}
 
 	@Override
 	public void logout() {
+		activeAcc.logoutProfile();
 		activeAcc = null;
 	}
 
@@ -169,33 +167,41 @@ public class NetflixClass implements Netflix {
 	}
 
 	@Override
-	public void profile(String profileName) throws NoClientLoggedInException, ProfileAlreadyExistException, ProfileNumberExccededException {
+	public void profile(String profileName, int ageRate, boolean isKids) throws NoClientLoggedInException, 
+	ProfileAlreadyExistException, ProfileNumberExceededException{
 		Account activeAcc = getActiveAccount();				// can throw a NoClientLoggedInException
-		activeAcc.addProfile(profileName);		// can throw an exception
-	}
-
-	@Override
-	public void profileKids(String profileName, int ageRate) throws NoClientLoggedInException, ProfileAlreadyExistException, ProfileNumberExccededException {
-		Account activeAcc = getActiveAccount();				// can throw a NoClientLoggedInException
-		activeAcc.addChildrenProfile(profileName, ageRate);		// can throw an exception
+		activeAcc.addProfile(profileName, ageRate, isKids);		// can throw a ProfileAlreadyExistException or ProfileNumberExceededException
 	}
 
 	@Override
 	public void select(String profileName) throws NoClientLoggedInException, ProfileDoesNotExistException {
 		Account activeAcc = getActiveAccount();		// can throw a NoClientLoggedInException
-		activeAcc.setActiveProfile(profileName);
+		activeAcc.setActiveProfile(profileName);	// can throw a ProfileDoesNotExistException
 	}
 
 	@Override
-	public void watch(String title) {
-		// TODO Auto-generated method stub
-
+	public void watch(String title) throws NoClientLoggedInException, NoProfileSelectedException, NonExistentContentException,
+	InapropriateContentException {
+		Account activeAcc = getActiveAccount(); // can throw a NoClientLoggedInException
+		if(!activeAcc.isProfileActive())
+			throw new NoProfileSelectedException();
+		if(!contents.containsKey(title))
+			throw new NonExistentContentException();
+		// Map<String, Content> contents
+		Content c = contents.get(title);
+		activeAcc.watchContent(c); 				// can throw an InapropriateContentException 
 	}
 
 	@Override
-	public void rate(String title, int rating) {
-		// TODO Auto-generated method stub
-
+	public void rate(String title, int rating) throws NoClientLoggedInException, NoProfileSelectedException,
+			NonExistentContentException, NotInRecentlyWatchedException, AlreadyRatedException {
+		Account activeAcc = getActiveAccount(); // can throw a NoClientLoggedInException
+		if(!activeAcc.isProfileActive())
+			throw new NoProfileSelectedException();
+		if(!contents.containsKey(title))
+			throw new NonExistentContentException();
+		activeAcc.rateContent(title, rating);		// may throw NotInRecentlyWatchedException or AlreadyRatedException
+		storeInContentByRate(title, rating);
 	}
 
 	@Override
@@ -266,6 +272,15 @@ public class NetflixClass implements Netflix {
 	private boolean isClientLogged() {
 		return activeAcc != null;
 	}
-
+	
+	/**
+	 * Private method to store a content in the collection of ratings.
+	 * @param title content's title.
+	 * @param rating rating given to a content with title <code>title</code>.
+	 */
+	private void storeInContentByRate(String title, int rating) {
+		//SortedMap<String, Integer> ratings;			// TODO not the right structure
+		//ratings.put(title, Integer.valueOf(rating));
+	}
 	
 }

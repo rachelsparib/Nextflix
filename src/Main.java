@@ -1,50 +1,36 @@
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Scanner;
 
 import account.Account;
+import account.ChildrenProfile;
+import account.Profile;
 import content.Content;
+import content.RatedContent;
 import enums.CommandEnum;
 import enums.MembershipPlanEnum;
 import enums.MessageEnum;
 import netflix.Netflix;
 import netflix.NetflixClass;
-import netflix.exceptions.AccountDoesNotExistException;
-import netflix.exceptions.ClientAlreadyLoggedInException;
-import netflix.exceptions.DowngradeMembershipException;
-import netflix.exceptions.ExceededMaxNumberDevicesException;
-import netflix.exceptions.ExistentAccountException;
-import netflix.exceptions.MembershipUnchangedException;
-import netflix.exceptions.NoClientLoggedInException;
-import netflix.exceptions.OccupiedServiceException;
-import netflix.exceptions.ProfileAlreadyExistException;
-import netflix.exceptions.ProfileDoesNotExistException;
-import netflix.exceptions.ProfileNumberExccededException;
-import netflix.exceptions.WrongPasswordException;
+import netflix.exceptions.*;
 
 /**
  * A program to manage a streaming service.
- * 
  * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
  *
  */
 public class Main {
-
+	
 	/**
 	 * Auxiliary method for obtaining the command option.
-	 * 
-	 * @param in
-	 *            standard input stream.
+	 * @param in standard input stream.
 	 * @return command obtained from input.
 	 */
 	private static CommandEnum getOption(Scanner in) {
-		String nextLine = in.nextLine().toUpperCase();
-		
-		return CommandEnum.valueOf(nextLine);
+		return CommandEnum.valueOf(in.nextLine().toUpperCase());
 	}
-
+	
 	/**
 	 * Auxiliary method for executing the program options (functionalities).
 	 */
@@ -52,9 +38,9 @@ public class Main {
 		Scanner in = new Scanner(System.in);
 		Netflix n = new NetflixClass();
 		CommandEnum c = getOption(in);
-
-		while (!c.equals(CommandEnum.EXIT)) {
-			switch (c) {
+		
+		while(!c.equals(CommandEnum.EXIT)) {
+			switch(c) {
 			case UPLOAD:
 				upload(in, n);
 				break;
@@ -80,13 +66,13 @@ public class Main {
 				select(in, n);
 				break;
 			case WATCH:
-				//
+				watch(in, n);
 				break;
 			case RATE:
-				//
+				rate(in, n);
 				break;
 			case INFOACCOUNT:
-				//
+				infoAccount(n);
 				break;
 			case SEARCHBYGENRE:
 				//
@@ -106,95 +92,80 @@ public class Main {
 		}
 		System.out.println(MessageEnum.EXIT_SUCCESS);
 	}
-
+	
 	/**
 	 * Auxiliary method for uploading content to the streaming service.
-	 * 
-	 * @param in
-	 *            standard input stream.
-	 * @param n
-	 *            a streaming service.
+	 * @param in standard input stream.
+	 * @param n a streaming service.
 	 */
 	private static void upload(Scanner in, Netflix n) {
 		boolean isMovie = true;
 		uploadContent(in, n, isMovie);
 		isMovie = false;
 		uploadContent(in, n, isMovie);
-
+		
 		System.out.println(MessageEnum.UPLOAD_SUCCESS);
 		Iterator<Content> it = n.listLastUploaded();
-		while (it.hasNext()) {
+		while(it.hasNext()) {
 			Content cont = it.next();
 			System.out.print(cont);
-			printCast(n.listCastMembers(cont));
+			printCast(n.listCastMembers(cont));	
 			System.out.print(".\n");
 		}
 	}
-
+	
 	/**
 	 * Auxiliary method for uploading content.
-	 * 
-	 * @param in
-	 *            standard input stream.
-	 * @param n
-	 *            a streaming service.
+	 * @param in standard input stream.
+	 * @param n a streaming service.
 	 */
 	private static void uploadContent(Scanner in, Netflix n, boolean isMovie) {
-		int nMovie = in.nextInt();
-		in.nextLine();
-		for (int i = 0; i < nMovie; i++) {
+		int nMovie = in.nextInt(); in.nextLine();
+		for( int i = 0; i < nMovie; i++ ) {
 			String title = in.nextLine();
 			String head = in.nextLine();
 			int duration = 0;
 			int seasons = 0;
 			int epsPerSeason = 0;
-			if (isMovie)
+			if(isMovie)
 				duration = in.nextInt();
 			else {
-				seasons = in.nextInt();
-				in.nextLine();
+				seasons = in.nextInt(); in.nextLine();
 				epsPerSeason = in.nextInt();
 			}
 			in.nextLine();
 			String s = in.nextLine();
 			int ageRate = Integer.parseInt(s.substring(0, s.indexOf("+")));
-			int year = in.nextInt();
-			in.nextLine();
+			int year = in.nextInt(); in.nextLine();
 			String genre = in.nextLine();
-			int nCast = in.nextInt();
-			in.nextLine();
-
+			int nCast = in.nextInt(); in.nextLine();
+			
 			List<String> cast = new LinkedList<String>();
-			for (int j = 0; j < nCast; j++)
+			for(int j = 0; j < nCast; j++)
 				cast.add(in.nextLine());
-			if (isMovie)
+			if(isMovie)
 				n.uploadMovie(title, head, duration, ageRate, year, genre, cast);
 			else
 				n.uploadTvShow(title, head, seasons, epsPerSeason, ageRate, year, genre, cast);
-		}
+		}	
 	}
-
+	
 	/**
 	 * Auxiliary method for printing a maximum of three cast members names.
-	 * 
-	 * @param cast
-	 *            cast members of a content.
+	 * @param cast cast members of a content.
 	 */
 	private static void printCast(Iterator<String> listCast) {
 		int i = 0;
-		while (listCast.hasNext() && i < 3) {
+		while(listCast.hasNext() && i < 3) {			
 			System.out.print("; " + listCast.next());
 			i++;
 		}
 	}
-
+	
 	/**
 	 * Auxiliary method to register a new account in the streaming service.
-	 * 
-	 * @param in
-	 *            standard input stream.
-	 * @param n
-	 *            a streaming service.
+	 * @param in standard input stream.
+	 * @param n a streaming service.
 	 */
 	private static void register(Scanner in, Netflix n) {
 		String name = in.nextLine();
@@ -204,20 +175,19 @@ public class Main {
 		try {
 			n.register(name, email, pwd, deviceID);
 			System.out.println(MessageEnum.LOGIN_SUCCESS + name + " (" + deviceID + ").");
-		} catch (OccupiedServiceException e) {
+		}
+		catch(OccupiedServiceException e) {
 			System.out.println(MessageEnum.SERVICE_BUSY);
-		} catch (ExistentAccountException e) {
+		}
+		catch(ExistentAccountException e) {
 			System.out.println(MessageEnum.INVALID_REGISTRATION + email + ".");
 		}
 	}
-
+	
 	/**
 	 * Auxiliary method to login in the streaming service.
-	 * 
-	 * @param in
-	 *            standard input stream.
-	 * @param n
-	 *            a streaming service.
+	 * @param in standard input stream.
+	 * @param n a streaming service.
 	 */
 	private static void login(Scanner in, Netflix n) {
 		String email = in.nextLine();
@@ -229,9 +199,9 @@ public class Main {
 			System.out.println(MessageEnum.LOGIN_SUCCESS + name + " (" + devID + ").");
 		} catch (ClientAlreadyLoggedInException e) {
 			System.out.println(MessageEnum.CLIENT_ALREADY_LOGGEDIN);
-		} catch (OccupiedServiceException e) {
+		} catch(OccupiedServiceException e) {
 			System.out.println(MessageEnum.SERVICE_BUSY);
-		} catch (AccountDoesNotExistException e) {
+		} catch(AccountDoesNotExistException e) {
 			System.out.println(MessageEnum.ACCOUNT_DOES_NOT_EXIST);
 		} catch (WrongPasswordException e) {
 			System.out.println(MessageEnum.WRONG_PASS);
@@ -239,17 +209,14 @@ public class Main {
 			System.out.println(MessageEnum.NOT_POSSIBLE_CONNECT_MORE_DEVICES);
 		}
 	}
-
+	
 	/**
 	 * Auxiliary method to terminate an active session and disconnect a device.
-	 * 
-	 * @param n
-	 *            a streaming service.
+	 * @param n a streaming service.
 	 */
 	private static void disconnect(Netflix n) {
 		try {
-			Account c = n.getActiveAccount(); // may launch
-												// NoClientLoggedException
+			Account c = n.getActiveAccount();		// may throw NoClientLoggedException
 			String name = c.getName();
 			String deviceID = c.getActiveDevice();
 			n.disconnect();
@@ -258,40 +225,32 @@ public class Main {
 			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
 		}
 	}
-
+	
 	/**
 	 * Auxiliary method to terminate an active session.
-	 * 
-	 * @param n
-	 *            a streaming service.
+	 * @param n a streaming service.
 	 */
 	private static void logout(Netflix n) {
 		try {
-			Account c = n.getActiveAccount(); // may launch
-												// NoClientLoggedException
-			
+			Account c = n.getActiveAccount();			// may throw NoClientLoggedException
 			String name = c.getName();
 			String deviceID = c.getActiveDevice();
 			n.logout();
-			System.out.println(MessageEnum.LOGOUT_SUCCESS + name + " (" + deviceID + MessageEnum.DEV_STILL_CONNECTED);
+			System.out.println(MessageEnum.LOGOUT_SUCCESS + name + " (" + deviceID + MessageEnum.DEV_STILL_CONNECTED);	
 		} catch (NoClientLoggedInException e) {
 			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
 		}
 	}
-
+	
 	/**
 	 * Auxiliary method for changing a membership plan.
-	 * 
-	 * @param in
-	 *            standard input stream.
-	 * @param n
-	 *            a streaming service.
+	 * @param in standard input stream.
+	 * @param n a streaming service.
 	 */
 	private static void membership(Scanner in, Netflix n) {
 		String newPlan = in.nextLine();
 		try {
-			Account c = n.getActiveAccount(); // may launch
-												// NoClientLoggedException
+			Account c = n.getActiveAccount();			// may throw NoClientLoggedException
 			MembershipPlanEnum currentPlan = c.getPlan();
 			n.setMembershipPlan(newPlan);
 			System.out.println(MessageEnum.MEMBERSHIP_CHANGED_SUCESS + currentPlan.getName() + " to " + newPlan + ".");
@@ -301,55 +260,45 @@ public class Main {
 			System.out.println(MessageEnum.NO_MEMBERSHIP_CHANGE);
 		} catch (DowngradeMembershipException e) {
 			System.out.println(MessageEnum.CANNOT_DOWNGRADE_MEMBERSHIP);
-		}
+		}		
 	}
-
+	
 	/**
 	 * Auxiliary method to add a new profile to an account.
-	 * 
-	 * @param in
-	 *            standard input stream.
-	 * @param n
-	 *            a streaming service.
+	 * @param in standard input stream.
+	 * @param n a streaming service.
 	 */
 	private static void profile(Scanner in, Netflix n) {
 		String name = in.nextLine();
 		String type = in.nextLine();
-
+		Boolean isKids = false;
+		int ageRate = 0;				
+		if(type.equalsIgnoreCase("CHILDREN")) {
+			isKids = true;
+			ageRate = in.nextInt();
+			in.nextLine();
+		}
 		try {
-			int ageRate;
-			if (type.equalsIgnoreCase("CHILDREN")) {
-				ageRate = in.nextInt();
-				in.nextLine();
-
-				n.profileKids(name, ageRate);
-			} else {
-				n.profile(name);
-			}
-			
+			n.profile(name, ageRate, isKids);
 			System.out.println(MessageEnum.PROFILE_ADDED);
 		} catch (NoClientLoggedInException e) {
 			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
 		} catch (ProfileAlreadyExistException e) {
 			System.out.println(MessageEnum.PROFILE_ALREADY_EXIST + name + ".");
-		} catch (ProfileNumberExccededException e) {
-			System.out.println(MessageEnum.PROFILE_MAX_EXCCEDED);
+		} catch (ProfileNumberExceededException e) {
+			System.out.println(MessageEnum.PROFILE_MAX_EXCEEDED);
 		}
 	}
-
+	
 	/**
-	 * Auxiliary method to select a new profile to an account.
-	 * 
-	 * @param in
-	 *            standard input stream.
-	 * @param n
-	 *            a streaming service.
+	 * Auxiliary method to select a new profile in an account.
+	 * @param in standard input stream.
+	 * @param n a streaming service.
 	 */
 	private static void select(Scanner in, Netflix n) {
 		String name = in.nextLine();
 		try {
 			n.select(name);
-			
 			System.out.println(MessageEnum.LOGIN_SUCCESS + name + ".");
 		} catch (NoClientLoggedInException e) {
 			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
@@ -357,23 +306,122 @@ public class Main {
 			System.out.println(MessageEnum.PROFILE_DOES_NOT_EXIST);
 		}
 	}
-
+	
 	/**
-	 * Auxiliary method for printing iterable collections.
-	 * 
-	 * @param it
-	 *            an iterator of a generic type.
+	 * Auxiliary method to watch a content in the streaming service.
+	 * @param in standard input stream.
+	 * @param n a streaming service.
 	 */
-	private static <E> void printIterator(Iterator<E> it) { // TODO check
-															// utility by the
-															// end
-		while (it.hasNext())
-			System.out.println(it.next().toString());
+	private static void watch(Scanner in, Netflix n) {
+		String title = in.nextLine();
+		try {
+			n.watch(title);
+			System.out.println(MessageEnum.WATCH_SUCESS + title + "...");
+		} catch (NoClientLoggedInException e) {
+			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
+		} catch (NoProfileSelectedException e) {
+			System.out.println(MessageEnum.PROFILE_NOT_SELECTED);
+		} catch (NonExistentContentException e) {
+			System.out.println(MessageEnum.CONTENT_NOT_EXISTS);
+		} catch (InapropriateContentException e) {
+			System.out.println(MessageEnum.CONTENT_INNAPROPRIATE);
+		}
 	}
-
+	
+	/**
+	 * Auxiliary method to rate a recently watched content.
+	 * @param in standard input stream.
+	 * @param n a streaming service.
+	 */
+	private static void rate(Scanner in, Netflix n) {
+		String title = in.nextLine();
+		int rate = in.nextInt(); in.nextLine();
+		try {
+			n.rate(title, rate);
+			System.out.println(MessageEnum.RATE_SUCCESS + title + ".");
+		} catch (NoClientLoggedInException e) {
+			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
+		} catch (NoProfileSelectedException e) {
+			System.out.println(MessageEnum.PROFILE_NOT_SELECTED);
+		} catch (NonExistentContentException e) {
+			System.out.println(MessageEnum.CONTENT_NOT_EXISTS);
+		} catch (NotInRecentlyWatchedException e) {
+			System.out.println(MessageEnum.CONTENT_NOT_RECENT);
+		} catch (AlreadyRatedException e) {
+			System.out.println(MessageEnum.CONTENT_ALREADY_RATED);
+		}
+	}
+	
+	/**
+	 * Auxiliary method to show all the information associated to an account.
+	 * @param n a streaming service.
+	 */
+	private static void infoAccount(Netflix n) {
+		try{
+			Account c = n.getActiveAccount();
+			System.out.println(c.getName()+":");
+			System.out.print(c.getPlan() + " ");
+			printDevices(c.listDevices());
+			printProfiles(c.listProfiles());
+			
+		} catch (NoClientLoggedInException e) {
+			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
+		}
+		
+		
+	}
+	
+	private static void printDevices(Iterator<String> it) {
+		if(it.hasNext()) {
+			System.out.print("(" + it.next());
+			while(it.hasNext())
+				System.out.print("; " + it.next());
+			System.out.println(").");
+		}
+	}
+	
+	private static void printProfiles(Iterator<Profile> it) {
+		if(it.hasNext()) {
+			while(it.hasNext()) {
+				Profile p = it.next();
+				System.out.print("Profile: " + p.getName());
+				if(p instanceof ChildrenProfile)
+					System.out.print(" (" + ((ChildrenProfile)p).getAgeRate() + ")");
+				System.out.println();
+				printRecentlyWatched(p.listRecentlyWatched(), p);
+			}	
+		}
+		else 
+			System.out.println(MessageEnum.NO_PROFILES_DEFINED);
+	}
+	
+	private static void printRecentlyWatched(Iterator<RatedContent> it, Profile p) {
+		if(it.hasNext()) {
+			System.out.print(it.next().getContent().getTitle());
+			while(it.hasNext()) {
+				RatedContent c = it.next();
+				System.out.print("; " + c.getContent().getTitle());
+			}
+			
+			System.out.printf(".\n");
+			printRated(p.listRated());
+		}
+		else
+			System.out.println(MessageEnum.EMPTY_RECENTLY_WATCHED);
+	}
+	
+	private static void printRated(Iterator<RatedContent> it) {
+		if(it.hasNext()) {
+			System.out.print(it.next());
+			while(it.hasNext())
+				System.out.print("; " + it.next());
+			
+			System.out.printf(".\n");
+		}
+	}
+	
 	/**
 	 * Main program.
-	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {

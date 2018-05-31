@@ -5,10 +5,11 @@ package account;
  *
  */
 public class AdultProfileClass extends AbstractProfileClass implements AdultProfile {
-
+	/**
+	 * Creates a profile for an adult.
+	 * @param name name of the profile.
+	 */
 	public AdultProfileClass(String name) {
 		super(name);
-		// TODO Auto-generated constructor stub
 	}
-
 }

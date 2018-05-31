@@ -22,5 +22,6 @@ public enum CommandEnum {
 	SEARCHBYGENRE,
 	SEARCHBYNAME,
 	SEARCHBYRATE,
-	EXIT
+	EXIT;
+	
 }
