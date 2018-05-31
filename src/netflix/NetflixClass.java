@@ -1,12 +1,11 @@
 package netflix;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import account.Account;
@@ -17,7 +16,24 @@ import content.Content;
 import content.MovieClass;
 import content.TvShowClass;
 import enums.MembershipPlanEnum;
-import netflix.exceptions.*;
+import netflix.exceptions.AccountDoesNotExistException;
+import netflix.exceptions.AlreadyRatedException;
+import netflix.exceptions.ClientAlreadyLoggedInException;
+import netflix.exceptions.DeviceAlreadyExistsException;
+import netflix.exceptions.DowngradeMembershipException;
+import netflix.exceptions.ExceededMaxNumberDevicesException;
+import netflix.exceptions.ExistentAccountException;
+import netflix.exceptions.InapropriateContentException;
+import netflix.exceptions.MembershipUnchangedException;
+import netflix.exceptions.NoClientLoggedInException;
+import netflix.exceptions.NoProfileSelectedException;
+import netflix.exceptions.NonExistentContentException;
+import netflix.exceptions.NotInRecentlyWatchedException;
+import netflix.exceptions.OccupiedServiceException;
+import netflix.exceptions.ProfileAlreadyExistException;
+import netflix.exceptions.ProfileDoesNotExistException;
+import netflix.exceptions.ProfileNumberExceededException;
+import netflix.exceptions.WrongPasswordException;
 /**
  * An implementation of the streaming service.
  * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
@@ -55,11 +71,6 @@ public class NetflixClass implements Netflix {
 	private Account activeAcc;
 	
 	/**
-	 * A sorted map with content's ratings mapped by content title.
-	 */
-	private SortedMap<String, Integer> ratings;	
-	
-	/**
 	 * Creates a streaming service.
 	 */
 	public NetflixClass() {
@@ -69,7 +80,6 @@ public class NetflixClass implements Netflix {
 		contentByCast = new HashMap<>();	// castName -> SortedSet<Content> (comparatorByYear)
 		accounts = new HashMap<>();			// email -> Account
 		activeAcc = null;
-		ratings = new TreeMap<>();	// title -> int wrapped by Integer 	(String naturally ordered)
 	}
 	
 	@Override
@@ -281,6 +291,30 @@ public class NetflixClass implements Netflix {
 	private void storeInContentByRate(String title, int rating) {
 		//SortedMap<String, Integer> ratings;			// TODO not the right structure
 		//ratings.put(title, Integer.valueOf(rating));
+	}
+
+	@Override
+	public Iterator<Content> searchByGenre(String genre) throws NoClientLoggedInException, NoProfileSelectedException {
+		Account activeAcc = getActiveAccount(); // can throw a NoClientLoggedInException
+		if(!activeAcc.isProfileActive())
+			throw new NoProfileSelectedException();
+		
+		return contentByGenre.get(genre).iterator(); 
+	}
+
+	@Override
+	public Iterator<Content> searchByName(String name) throws NoClientLoggedInException, NoProfileSelectedException {
+		Account activeAcc = getActiveAccount(); // can throw a NoClientLoggedInException
+		if(!activeAcc.isProfileActive())
+			throw new NoProfileSelectedException();
+		
+		return contentByCast.get(name).iterator();
+	}
+
+	@Override
+	public Iterator<Content> searchByRate(String rate) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

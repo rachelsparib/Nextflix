@@ -36,6 +36,7 @@ public enum MessageEnum {
 	CONTENT_ALREADY_RATED				("Show already rated."),
 	NO_PROFILES_DEFINED					("No profiles defined."),
 	EMPTY_RECENTLY_WATCHED				("Empty list of recently seen shows."),
+	NO_SHOW_FOUND						("No show found."),
 	INVALID_COMMAND						("Unknown command."),
 	EXIT_SUCCESS						("Exiting...");
 	

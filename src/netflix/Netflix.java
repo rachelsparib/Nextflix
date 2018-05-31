@@ -160,5 +160,16 @@ public interface Netflix {
 	
 	Iterator<Account> infoAccount();		// uses active account. gets toString of Account and connected devices and profiles, both by order of insertion
 							// define iterators to use in this method
-							// partir este metodo em varios iteradores	
+							// partir este metodo em varios iteradores
+	
+	/**
+	 * 
+	 * @param genre
+	 * @return
+	 */
+	Iterator<Content> searchByGenre(String genre) throws NoClientLoggedInException, NoProfileSelectedException;
+	
+	Iterator<Content> searchByName(String name) throws NoClientLoggedInException, NoProfileSelectedException;
+	
+	Iterator<Content> searchByRate(String rate) throws NoClientLoggedInException, NoProfileSelectedException;
 }
