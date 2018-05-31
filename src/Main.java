@@ -84,7 +84,7 @@ public class Main {
 				searchByName(in, n);
 				break;
 			case SEARCHBYRATE:
-				//
+				searchByRate(in, n);
 				break;
 			default:
 				System.out.println(MessageEnum.INVALID_COMMAND);
@@ -469,28 +469,30 @@ public class Main {
 			if (it.hasNext()) {
 				while (it.hasNext()) {
 					Content c = it.next();
-					
+
 					String info = c.toString();
 					Iterator<String> it2 = c.listCast();
 					while (it2.hasNext()) {
 						String castName = it2.next();
-						
+
 						info += "; " + castName;
 					}
 					info += ".";
-					
+
 					System.out.println(info);
 				}
 			} else
 				System.out.println(MessageEnum.NO_SHOW_FOUND);
-			
+
 		} catch (NoClientLoggedInException e) {
 			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
 		} catch (NoProfileSelectedException e) {
 			System.out.println(MessageEnum.PROFILE_NOT_SELECTED);
+		} catch (NoShowFoundException e) {
+			System.out.println(MessageEnum.NO_SHOW_FOUND);
 		}
 	}
-	
+
 	private static void searchByName(Scanner in, Netflix n) {
 		String name = in.nextLine();
 
@@ -499,26 +501,62 @@ public class Main {
 			if (it.hasNext()) {
 				while (it.hasNext()) {
 					Content c = it.next();
+
+					String info = c.toString();
+					Iterator<String> it2 = c.listCast();
+					while (it2.hasNext()) {
+						String castName = it2.next();
+
+						info += "; " + castName;
+					}
+					info += ".";
+
+					System.out.println(info);
+				}
+			} else
+				System.out.println(MessageEnum.NO_SHOW_FOUND);
+
+		} catch (NoClientLoggedInException e) {
+			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
+		} catch (NoProfileSelectedException e) {
+			System.out.println(MessageEnum.PROFILE_NOT_SELECTED);
+		} catch (NoShowFoundException e) {
+			System.out.println(MessageEnum.NO_SHOW_FOUND);
+		}
+	}
+
+	private static void searchByRate(Scanner in, Netflix n) {
+		int rate = in.nextInt();
+		in.nextLine();
+
+		try {
+			Iterator<RatedContent> it = n.searchByRate(rate);
+			if (it.hasNext()) {
+				while (it.hasNext()) {
+					RatedContent rc = it.next();
+					Content c = rc.getContent();
+					String rateString = Float.toString(rc.getAverage()).substring(0, 3);
 					
 					String info = c.toString();
 					Iterator<String> it2 = c.listCast();
 					while (it2.hasNext()) {
 						String castName = it2.next();
-						
+
 						info += "; " + castName;
 					}
-					info += ".";
-					
+					info += ". [" + rateString + "]";
+
 					System.out.println(info);
 				}
 			} else
 				System.out.println(MessageEnum.NO_SHOW_FOUND);
-			
+
 		} catch (NoClientLoggedInException e) {
 			System.out.println(MessageEnum.NO_CLIENT_IS_LOGGED);
 		} catch (NoProfileSelectedException e) {
 			System.out.println(MessageEnum.PROFILE_NOT_SELECTED);
 		}
+
 	}
 
 	/**

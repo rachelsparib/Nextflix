@@ -116,6 +116,8 @@ public interface Account {
 	 */
 	boolean isProfileActive();
 	
+	Profile getActiveProfile();
+	
 	/**
 	 * Watches a content of the streaming service.
 	 * @param cont a content of the streaming service.

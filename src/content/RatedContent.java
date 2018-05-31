@@ -7,10 +7,12 @@ package content;
 public class RatedContent {
 	private Content content;
 	private int rating;
+	private float average;
 	
 	public RatedContent(Content content) {
 		this.content = content;
 		this.setRating(-1);  // -1 it is not rated yet.
+		this.setAverage(-1.0f);
 	}
 	
 	public Content getContent() {
@@ -23,6 +25,14 @@ public class RatedContent {
 
 	public void setRating(int rating) {
 		this.rating = rating;
+	}
+	
+	public float getAverage() {
+		return average;
+	}
+
+	public void setAverage(float average) {
+		this.average = average;
 	}
 	
 	@Override

@@ -210,7 +210,8 @@ public class AccountClass implements Account {
 		return this.profiles.iterator();
 	}
 	
-	
-	
-	
+	@Override
+	public Profile getActiveProfile() {
+		return activeProfile;
+	}
 }

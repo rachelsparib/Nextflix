@@ -7,7 +7,7 @@ import java.util.List;
  * @author Antonio Santos 49055 MIEI e Raquel Pena 45081 MIEI
  *
  */
-public abstract class AbstractContentClass implements Content {
+public abstract class AbstractContentClass implements Content, Comparable<Content> {
 	/**
 	 * The content's title.
 	 */
@@ -80,6 +80,11 @@ public abstract class AbstractContentClass implements Content {
 	
 	public Iterator<String> listCast(){
 		return cast.iterator();
+	}
+	
+	@Override
+	public int compareTo(Content o) {
+		return this.getTitle().compareToIgnoreCase(o.getTitle());
 	}
 	
 	public abstract String toString();

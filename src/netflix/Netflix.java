@@ -4,7 +4,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import account.Account;
+import account.Profile;
 import content.Content;
+import content.RatedContent;
 import netflix.exceptions.*;
 
 /**
@@ -166,10 +168,11 @@ public interface Netflix {
 	 * 
 	 * @param genre
 	 * @return
+	 * @throws NoShowFoundException 
 	 */
-	Iterator<Content> searchByGenre(String genre) throws NoClientLoggedInException, NoProfileSelectedException;
+	Iterator<Content> searchByGenre(String genre) throws NoClientLoggedInException, NoProfileSelectedException, NoShowFoundException;
 	
-	Iterator<Content> searchByName(String name) throws NoClientLoggedInException, NoProfileSelectedException;
+	Iterator<Content> searchByName(String name) throws NoClientLoggedInException, NoProfileSelectedException, NoShowFoundException;
 	
-	Iterator<Content> searchByRate(String rate) throws NoClientLoggedInException, NoProfileSelectedException;
+	Iterator<RatedContent> searchByRate(int rate) throws NoClientLoggedInException, NoProfileSelectedException;
 }
